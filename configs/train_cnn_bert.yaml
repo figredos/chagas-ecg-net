@@ -1,0 +1,9 @@
+defaults:
+  - cnn_bert: cnn_bert
+  - _self_
+
+name: cnn_bert
+task: Chagas Classification with CNN-BERT hybrid model, via ECG
+device: cuda
+seed: 42
+

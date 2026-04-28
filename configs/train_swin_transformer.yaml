@@ -1,0 +1,9 @@
+defaults:
+  - swin_transformer: swin_transformer
+  - _self_
+
+name: swin_transformer
+task: Chagas Classification with Swin Transformer model, via ECG
+device: cuda
+seed: 42
+

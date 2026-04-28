@@ -1,0 +1,40 @@
+data:
+  train_size: 0.8
+  test_size: 0.2
+  class_names: ["Chagas", "Normal", "Structural"]
+  use_pre_split: False
+  complete_dataset_path: datasets/complete/3_class_dataset.pt
+  split_train_dataset_path: datasets/split/train/3_class_train.pt
+  split_test_dataset_path: datasets/split/train/3_class_test.pt
+
+training:
+  epochs: 200
+  lr: 3e-4
+  weight_decay: 1e-2
+  plateau_patience: 5
+  es_patience: 35
+  min_delta: 1e-3
+  scheduler_factor: 0.5
+  scheduler_patience: 10
+  
+model:
+  batch_size: 128
+  d_model: 128
+  num_heads: 8
+  num_leads: 12
+  num_classes: 3
+  num_transformer_layers: 4
+  cnn_downsample_factor: 2
+
+paths:
+  checkpoints_dir: checkpoints/cnn_bert
+  save_filename: cnn_bert_artifact
+  # log_dir: checkpoints/cnn_bert/log_dir
+
+mlflow:
+  experiment_name: cnn_bert_ecg
+  run_name: null
+  tracking_uri: sqlite:///mlflow.db
+  version: v1
+
+notebook: False

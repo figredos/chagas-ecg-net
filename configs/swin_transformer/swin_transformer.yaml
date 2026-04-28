@@ -1,0 +1,44 @@
+data:
+  train_size: 0.8
+  test_size: 0.2
+  class_names: ["Chagas", "non-Chagas"]
+  use_pre_split: False
+  complete_dataset_path: datasets/complete/2_class_dataset.pt
+  split_train_dataset_path: datasets/split/2_class_train.pt
+  split_test_dataset_path: datasets/split/2_class_test.pt
+
+training:
+  epochs: 100
+  lr: 3e-4
+  weight_decay: 12e-3
+  plateau_patience: 10
+  es_patience: 20
+  min_delta: 15e-4
+  scheduler_factor: 0.5
+  scheduler_patience: 10
+  betas: [0.9, 0.99]  # Must have only 2 elements
+  eps: 1e-8
+
+model:
+  batch_size: 32
+  num_classes: 2
+  hidden_dim: 48
+  layers: [2, 2, 0, 0]  # Must have only 4 elements
+  heads: [2, 4, 0, 0] # Must have only 4 elements
+  window_size: 4
+  channels: 1
+  head_dim: 32
+  downscaling_factors: [4, 2, 1, 1]  # Must have only 4 elements
+  relative_pos_embedding: True
+
+paths:
+  checkpoints_dir: checkpoints/swin_transformer
+  save_filename: swin_transformer_artifact
+
+mlflow:
+  experiment_name: swin_transformer_ecg
+  run_name: null
+  tracking_uri: sqlite:///mlflow.db
+  version: v1
+
+notebook: False

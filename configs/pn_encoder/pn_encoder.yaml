@@ -1,0 +1,47 @@
+data:
+  train_size: 0.8
+  test_size: 0.2
+  class_names: ["Chagas", "non-Chagas"]
+  use_pre_split: False
+  complete_dataset_path: datasets/complete/2_class_dataset.pt
+  split_train_dataset_path: datasets/split/2_class_train.pt
+  split_test_dataset_path: datasets/split/2_class_test.pt
+
+  # Dataset specific  
+  wavelet: bior3.3
+  wavelet_level: 1
+  window_augment: True
+  window_size: 200
+  stride: 100
+  filter: 0.5
+
+training:
+  epochs: 50
+  lr: 1e-3
+  plateau_patience: 5
+  es_patience: 15
+  min_delta: 0
+  scheduler_factor: 0.5
+  scheduler_patience: 10
+
+model:  
+  batch_size: 128
+  embed_dim: 128
+  num_layers: 6
+  num_heads: 8
+  num_leads: 12
+  num_classes: 2
+  dropout: 0.1
+  ff_multiplier: 4
+
+paths:
+  checkpoints_dir: checkpoints/pn_encoder
+  save_filename: pn_encoder_artifact
+
+mlflow:
+  experiment_name: pn_encoder_ecg
+  run_name: null
+  tracking_uri: sqlite:///mlflow.db
+  version: v1
+
+notebook: False
