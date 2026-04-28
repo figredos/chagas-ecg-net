@@ -1,0 +1,16 @@
+torch
+torchvision
+hydra-core
+omegaconf
+mlflow
+scikit-learn
+fastapi
+uvicorn
+pydantic
+evidently
+prometheus-client
+pytest
+httpx
+torchinfo
+mlflow
+ptwt
