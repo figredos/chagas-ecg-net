@@ -26,14 +26,13 @@ def instantiate_model_with_params(
 
 
 def load_model_from_registry(
-    root_path: str,
+    registry_root: str,
     model_name: str,
     model_version: str = "latest",
     device: str = "cpu",
-) -> ECGClassifier:
+) -> tuple[ECGClassifier, dict[str, Any]]:
     registry_base = os.path.join(
-        root_path,
-        "model_registry",
+        registry_root,
         model_name,
     )
 
@@ -78,4 +77,4 @@ def load_model_from_registry(
 
     model.eval()
 
-    return model
+    return model, metadata
