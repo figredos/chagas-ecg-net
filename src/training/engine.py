@@ -62,7 +62,7 @@ def train_step(
     train_loss = 0
     train_preds, train_labels = [], []
 
-    for batch, (X, y) in tqdm(
+    for _, (X, y) in tqdm(
         enumerate(dataloader), total=len(dataloader), desc="Train Step"
     ):
         X, y = X.to(device), y.to(device)
@@ -119,7 +119,7 @@ def test_step(
     test_preds, test_labels = [], []
 
     with torch.inference_mode():
-        for batch, (X, y) in tqdm(
+        for _, (X, y) in tqdm(
             enumerate(dataloader), total=len(dataloader), desc="Test Step"
         ):
             X, y = X.to(device), y.to(device)
@@ -189,11 +189,8 @@ def train(
     }
 
     for epoch in tqdm(range(epochs), total=epochs, desc="Epochs"):
-        (
-            train_loss,
-            # train_acc,
-            (train_preds, train_labels),
-        ) = train_step(
+
+        train_loss, (train_preds, train_labels) = train_step(
             model=model,
             dataloader=train_dataloader,
             loss_fn=loss_fn,
@@ -201,11 +198,8 @@ def train(
             device=device,
             notebook=notebook,
         )
-        (
-            test_loss,
-            # test_acc,
-            (test_preds, test_labels),
-        ) = test_step(
+
+        test_loss, (test_preds, test_labels) = test_step(
             model=model,
             dataloader=test_dataloader,
             loss_fn=loss_fn,
@@ -217,12 +211,11 @@ def train(
 
         train_acc = accuracy_score(y_pred=train_preds, y_true=train_labels)
 
-        (test_acc, test_precision, test_recall, test_f1) = compute_and_extract_metrics(
+        test_acc, test_precision, test_recall, test_f1 = compute_and_extract_metrics(
             test_preds.cpu(), test_labels.cpu()
         )
 
-        print(
-            f"""
+        print(f"""
 ======================================      
 Epoch:                       |   {epoch + 1}   |  
 ======================================      
@@ -233,8 +226,7 @@ Train Accuracy:              | {train_acc:.3f} |
 Test Loss:                   | {test_loss:.3f} |
 
 Test Accuracy:               | {test_acc:.3f} |
-              """
-        )
+              """)
 
         results["train_loss"].append(
             train_loss.item() if isinstance(train_loss, torch.Tensor) else train_loss
@@ -272,13 +264,11 @@ Test Accuracy:               | {test_acc:.3f} |
                 optimizer=optimizer,
                 epoch=epoch + 1,
             ):
-                print(
-                    """
+                print("""
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       Early stopping triggered!
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                    """
-                )
+                    """)
                 break
 
     return results
