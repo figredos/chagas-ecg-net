@@ -108,12 +108,11 @@ class EarlyStopping:
         }
 
         if self.include_acc:
-            checkpoint_path = f"{self.file_dir}/{self.filename}_{test_acc}.pth"
+            self.checkpoint_path = f"{self.file_dir}/{self.filename}_{test_acc}.pth"
         else:
-            checkpoint_path = f"{self.file_dir}/{self.filename}.pth"
-        torch.save(checkpoint, checkpoint_path)
-        print(
-            f"""
+            self.checkpoint_path = f"{self.file_dir}/{self.filename}.pth"
+        torch.save(checkpoint, self.checkpoint_path)
+        print(f"""
 ######################################      
 Saving model at Epoch:       |   {epoch}   |        
 ######################################      
@@ -121,5 +120,4 @@ Test Loss:                   | {test_loss:.3f} |
 
 Test Accuracy:               | {test_acc:.3f} |
 ######################################      
-              """
-        )
+              """)
