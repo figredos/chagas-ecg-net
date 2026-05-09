@@ -215,6 +215,11 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# MLflow
+mlflow.db
+model_registry
+checkpoints
+
 # Other
 _ignore
 .DS_Store
