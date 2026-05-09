@@ -7,6 +7,8 @@ from omegaconf import DictConfig, OmegaConf
 
 import torch
 
+from sklearn.metrics import ConfusionMatrixDisplay
+
 from torch.utils.data import DataLoader
 
 from src.models.base import ECGClassifier
@@ -45,6 +47,11 @@ class BaseTrainer(ABC):
     def _build_datasets(
         self, use_pre_split: bool
     ) -> tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]: ...
+
+    @abstractmethod
+    def _build_confusion_matrix(
+        self, best_model_path: str, class_names: list[str]
+    ) -> ConfusionMatrixDisplay: ...
 
     @abstractmethod
     def fit(self) -> dict: ...
