@@ -17,7 +17,7 @@ class ECGClassifier(nn.Module, ABC):
     def predict(self, x: torch.Tensor) -> dict[str, Any]:
         self.eval()
 
-        with torch.no_grad():
+        with torch.inference_mode():
             logits = self.forward(x)
             probs = torch.nn.functional.softmax(logits, dim=1)
             confidence, predicted_index = torch.max(probs, dim=1)
