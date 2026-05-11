@@ -16,7 +16,8 @@ class ECGSignal:
 
 
 class ECGParser:
-    def from_hdf5(self, file_bytes: bytes) -> ECGSignal:
+    @staticmethod
+    def from_hdf5(file_bytes: bytes) -> ECGSignal:
         with tempfile.NamedTemporaryFile(suffix=".h5") as tmp:
             tmp.write(file_bytes)
             tmp.flush()
@@ -24,11 +25,14 @@ class ECGParser:
 
         return ECGSignal(signal=signal, sample_rate=SAMPLE_RATE)
 
-    def from_wfdb(self, dat_bytes: bytes, hea_bytes: bytes) -> ECGSignal:
+    @staticmethod
+    def from_wfdb(dat_bytes: bytes, hea_bytes: bytes | None) -> ECGSignal:
         with tempfile.TemporaryDirectory() as tmp:
             record_path = os.path.join(tmp, "record")
             Path(record_path + ".dat").write_bytes(dat_bytes)
-            Path(record_path + ".hea").write_bytes(hea_bytes)
+            if hea_bytes is not None:
+                Path(record_path + ".hea").write_bytes(hea_bytes)
+
             signal = read_wfdb(record_path)
 
         return ECGSignal(signal=signal, sample_rate=SAMPLE_RATE)
