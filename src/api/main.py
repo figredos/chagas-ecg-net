@@ -1,9 +1,17 @@
-from contextlib import asynccontextmanager
+import time
+
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
 from src.api.config import settings
 from src.inference.predictor import ECGPredictor
 from src.models.model_registry import load_model_from_registry
+
+from src.api.routers.health import router as health_router
+from src.api.routers.metrics import router as metrics_router
+from src.api.routers.predict import router as predict_router
+from src.api.routers.feedback import router as feedback_router
+from src.api.routers.model_info import router as model_info_router
 
 
 @asynccontextmanager
@@ -18,7 +26,12 @@ async def lifespan(app: FastAPI):
     app.state.predictor = ECGPredictor(model=model)
     app.state.metadata = metadata
 
-    app.state.metrics = {"request_count": 0, "error_count": 0, "total_latency_ms": 0.0}
+    app.state.start_time = time.time()
+    app.state.metrics = {
+        "request_count": 0,
+        "error_count": 0,
+        "total_latency_ms": 0.0,
+    }
 
     yield
 
@@ -26,3 +39,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(feedback_router)
+app.include_router(health_router)
+app.include_router(metrics_router)
+app.include_router(model_info_router)
+app.include_router(predict_router)
