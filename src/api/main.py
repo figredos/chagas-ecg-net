@@ -1,9 +1,12 @@
 import time
+import logging
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.config import settings
+from src.api.middleware import LoggingMiddleware
 from src.inference.predictor import ECGPredictor
 from src.models.model_registry import load_model_from_registry
 
@@ -39,6 +42,17 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+logging.basicConfig(level=logging.INFO, force=True)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+app.add_middleware(LoggingMiddleware)
+
 app.include_router(feedback_router)
 app.include_router(health_router)
 app.include_router(metrics_router)
