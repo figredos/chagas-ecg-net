@@ -12,5 +12,11 @@ prometheus-client
 pytest
 httpx
 torchinfo
-mlflow
+tensorboard
+pywavelets
 ptwt
+einops
+h5py
+wfdb
+torchaudio
+pydantic-settings
