@@ -49,7 +49,7 @@ def main(cfg: DictConfig) -> None:
         output_dir_path="./model_registry",
         model_name="swin_transformer",
         task=cfg.task,
-        version=cfg.cnn_bert.mlflow.version,
+        version=cfg.swin_transformer.mlflow.version,
         class_names=cfg.swin_transformer.data.class_names,
         input_shape=trainer.data_shape,
         constructor_kwargs=constructor_kwargs,

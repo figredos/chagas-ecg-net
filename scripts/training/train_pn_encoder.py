@@ -48,7 +48,7 @@ def main(cfg: DictConfig) -> None:
         output_dir_path="./model_registry",
         model_name="pn_encoder",
         task=cfg.task,
-        version=cfg.cnn_bert.mlflow.version,
+        version=cfg.pn_encoder.mlflow.version,
         class_names=cfg.pn_encoder.data.class_names,
         input_shape=trainer.data_shape,
         constructor_kwargs=constructor_kwargs,
