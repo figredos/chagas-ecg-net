@@ -209,7 +209,7 @@ def train(
 
         scheduler.step(test_loss)
 
-        train_acc = accuracy_score(y_pred=train_preds, y_true=train_labels)
+        train_acc = accuracy_score(y_pred=train_preds.cpu(), y_true=train_labels.cpu())
 
         test_acc, test_precision, test_recall, test_f1 = compute_and_extract_metrics(
             test_preds.cpu(), test_labels.cpu()
@@ -242,6 +242,13 @@ Test Accuracy:               | {test_acc:.3f} |
         results["test_recall"].append(test_recall)
         results["test_f1"].append(test_f1)
 
+        test_metrics = {
+            "accuracy": test_acc,
+            "f1": test_f1,
+            "precision": test_precision,
+            "recall": test_recall,
+        }
+
         if run_id is not None:
             mlflow.log_metrics(
                 {
@@ -260,7 +267,7 @@ Test Accuracy:               | {test_acc:.3f} |
             if early_stopping(
                 model=model,
                 test_loss=test_loss,
-                test_acc=test_acc,
+                test_metrics=test_metrics,
                 optimizer=optimizer,
                 epoch=epoch + 1,
             ):
@@ -297,7 +304,7 @@ def get_predictions_and_targets(
     targets = []
 
     with torch.inference_mode():
-        for batch, (X, y) in tqdm(
+        for _, (X, y) in tqdm(
             enumerate(test_dataloader),
             total=len(test_dataloader),
             desc="Getting Predictions",
