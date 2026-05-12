@@ -36,7 +36,7 @@ class EarlyStopping:
         self,
         model: torch.nn.Module,
         test_loss: float,
-        test_acc: float,
+        test_metrics: dict[str, float],
         optimizer: torch.optim.Optimizer,
         epoch: int,
     ) -> bool:
@@ -56,15 +56,15 @@ class EarlyStopping:
         Returns:
             `bool`: A boolean of whether the model has surpassed the maximum number of allowed epochs.
         """
-        metric = test_loss if self.mode == "min" else test_acc
+        metric = test_loss if self.mode == "min" else test_metrics["accuracy"]
 
         if self.metric is None:
             self.metric = metric
-            self.save_checkpoint(model, test_loss, test_acc, optimizer, epoch)
+            self.save_checkpoint(model, test_loss, test_metrics, optimizer, epoch)
         elif self._is_better(metric):
             self.metric = metric
             self.counter = 0
-            self.save_checkpoint(model, test_loss, test_acc, optimizer, epoch)
+            self.save_checkpoint(model, test_loss, test_metrics, optimizer, epoch)
 
         else:
             self.counter += 1
@@ -86,7 +86,7 @@ class EarlyStopping:
         self,
         model: torch.nn.Module,
         test_loss: float,
-        test_acc: float,
+        test_metrics: dict[str, float],
         optimizer: torch.optim.Optimizer,
         epoch: int,
     ) -> None:
@@ -100,15 +100,20 @@ class EarlyStopping:
             epoch (int): Current epoch of training.
         """
         checkpoint = {
-            'epoch': epoch,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'test_loss': test_loss,
-            'test_acc': test_acc,
+            "epoch": epoch,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "test_loss": test_loss,
+            "test_acc": test_metrics["accuracy"],
+            "test_precision": test_metrics["precision"],
+            "test_f1": test_metrics["f1"],
+            "test_recall": test_metrics["recall"],
         }
 
         if self.include_acc:
-            self.checkpoint_path = f"{self.file_dir}/{self.filename}_{test_acc}.pth"
+            self.checkpoint_path = (
+                f"{self.file_dir}/{self.filename}_{test_metrics['accuracy']}.pth"
+            )
         else:
             self.checkpoint_path = f"{self.file_dir}/{self.filename}.pth"
         torch.save(checkpoint, self.checkpoint_path)
@@ -118,6 +123,6 @@ Saving model at Epoch:       |   {epoch}   |
 ######################################      
 Test Loss:                   | {test_loss:.3f} |
 
-Test Accuracy:               | {test_acc:.3f} |
+Test Accuracy:               | {test_metrics['accuracy']:.3f} |
 ######################################      
               """)
