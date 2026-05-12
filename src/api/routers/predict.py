@@ -48,9 +48,6 @@ async def predict(
         )
         process_time = (time.perf_counter() - start) * 1000
 
-        request.app.state.metrics["total_latency_ms"] += process_time
-        request.app.state.metrics["request_count"] += 1
-
         return PredictionResponse(
             **prediction.model_dump(),
             model_name=settings.model_name,
@@ -60,5 +57,4 @@ async def predict(
         )
 
     except Exception as e:
-        request.app.state.metrics["error_count"] += 1
         raise e
