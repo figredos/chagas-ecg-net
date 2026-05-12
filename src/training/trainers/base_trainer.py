@@ -13,6 +13,7 @@ from torch.utils.data import DataLoader
 
 from src.models.base import ECGClassifier
 from src.utils.callbacks import EarlyStopping
+from src.training.engine import get_predictions_and_targets
 
 
 class BaseTrainer(ABC):
@@ -48,10 +49,34 @@ class BaseTrainer(ABC):
         self, use_pre_split: bool
     ) -> tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]: ...
 
-    @abstractmethod
     def _build_confusion_matrix(
-        self, best_model_path: str, class_names: list[str]
-    ) -> ConfusionMatrixDisplay: ...
+        self,
+        best_model_path: str,
+        class_names: list[str],
+        test_dataloader: DataLoader,
+        notebook: bool,
+    ) -> ConfusionMatrixDisplay:
+
+        checkpoint = torch.load(best_model_path)
+        self.model.load_state_dict(checkpoint["model_state_dict"])
+
+        final_preds, final_labels = get_predictions_and_targets(
+            self.model,
+            test_dataloader,
+            notebook=notebook,
+            device=self.cfg.device,
+        )
+
+        disp = ConfusionMatrixDisplay.from_predictions(
+            y_true=final_labels.cpu(),
+            y_pred=final_preds.cpu(),
+            display_labels=class_names,
+            normalize='true',
+            cmap="Blues",
+        )
+        disp.figure_.set_size_inches(8, 6)
+
+        return disp
 
     @abstractmethod
     def fit(self) -> dict: ...

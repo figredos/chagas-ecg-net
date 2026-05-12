@@ -14,15 +14,13 @@ from torch.utils.data.dataset import Dataset
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.optim.optimizer import Optimizer as Optimizer
 
-from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
 
+from src.training.engine import train
 from src.data.datasets import CD2ECGDataset
 from src.utils.callbacks import EarlyStopping
 from src.training.trainers.base_trainer import BaseTrainer
 from src.models.pn_encoder import PreNormEncoderClassifier
-
-from src.training.engine import get_predictions_and_targets, train
 
 
 class PreNormEncoderTrainer(BaseTrainer):
@@ -148,30 +146,6 @@ class PreNormEncoderTrainer(BaseTrainer):
             experiment_name or self.cfg.pn_encoder.mlflow.experiment_name
         )
 
-    def _build_confusion_matrix(
-        self, best_model_path: str, class_names: list[str]
-    ) -> ConfusionMatrixDisplay:
-
-        self.model.load_state_dict(torch.load(best_model_path, weights_only=True))
-
-        final_preds, final_labels = get_predictions_and_targets(
-            self.model,
-            self.test_loader,
-            notebook=self.cfg.pn_encoder.notebook,
-            device=self.cfg.device,
-        )
-
-        disp = ConfusionMatrixDisplay.from_predictions(
-            y_true=final_labels.cpu(),
-            y_pred=final_preds.cpu(),
-            display_labels=class_names,
-            normalize='true',
-            cmap="Blues",
-        )
-        disp.figure_.set_size_inches(8, 6)
-
-        return disp
-
     def fit(self) -> dict:
         os.makedirs(self.cfg.pn_encoder.paths.checkpoints_dir, exist_ok=True)
         self._save_config()
@@ -212,6 +186,8 @@ class PreNormEncoderTrainer(BaseTrainer):
             disp = self._build_confusion_matrix(
                 best_model_path=self.early_stopping.checkpoint_path,
                 class_names=self.cfg.pn_encoder.data.class_names,
+                test_dataloader=self.test_loader,
+                notebook=self.cfg.pn_encoder.notebook,
             )
 
             mlflow.log_figure(disp.figure_, "confusion_matrix.png")
