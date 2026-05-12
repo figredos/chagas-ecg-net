@@ -226,3 +226,4 @@ _ignore
 /datasets
 /.conda
 /notebooks
+/outputs
