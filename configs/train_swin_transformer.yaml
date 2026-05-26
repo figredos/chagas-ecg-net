@@ -6,4 +6,6 @@ name: swin_transformer
 task: Chagas Classification with Swin Transformer model, via ECG
 device: cuda
 seed: 42
-
+hydra:
+  run:
+    dir: .

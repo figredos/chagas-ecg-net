@@ -6,4 +6,6 @@ name: cnn_bert
 task: Chagas Classification with CNN-BERT hybrid model, via ECG
 device: cuda
 seed: 42
-
+hydra:
+  run:
+    dir: .

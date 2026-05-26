@@ -6,4 +6,6 @@ name: pn_encoder
 task: Chagas Classification with Pre-Norm Transformer Encoder model, via ECG
 device: cuda
 seed: 42
-
+hydra:
+  run:
+    dir: .
