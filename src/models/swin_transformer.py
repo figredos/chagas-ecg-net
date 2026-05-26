@@ -433,8 +433,10 @@ class SwinTransformer(ECGClassifier):
         downscaling_factors: Tuple[int, int, int, int] = (4, 2, 2, 2),
         relative_pos_embedding: bool = True,
         class_names: list[str] | None = None,
+        device: torch.device | str = "cpu",
     ) -> None:
-        super().__init__(class_names or ["Chagas", "non-Chagas"])
+        super().__init__(class_names or ["non-Chagas", "Chagas"])
+        self.device = "cpu"
         self.layers = layers
 
         self.stage_1 = StageModule(

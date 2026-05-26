@@ -199,7 +199,7 @@ class CNNBertClassifier(ECGClassifier):
         device: str | torch.device = "cpu",
         class_names: list[str] | None = None,
     ) -> None:
-        super().__init__(class_names or ["Chagas", "Normal", "Structural"])
+        super().__init__(class_names or ["Normal", "Chagas", "Structural"])
         self.device = device
 
         self.cnn_encoder = MultiScaleCNNEncoder(

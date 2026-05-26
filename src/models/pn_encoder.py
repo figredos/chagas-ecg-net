@@ -115,7 +115,7 @@ class PreNormEncoderClassifier(ECGClassifier):
         ff_multiplier: int = 4,
         class_names: list[str] | None = None,
     ) -> None:
-        super().__init__(class_names or ["Chagas", "non-Chagas"])
+        super().__init__(class_names or ["non-Chagas", "Chagas"])
 
         self.device = device
         self.embed_dim = embed_dim
