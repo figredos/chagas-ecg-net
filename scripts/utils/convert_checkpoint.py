@@ -4,10 +4,11 @@ import os
 import json
 import torch
 
-
 from datetime import datetime
 
 from omegaconf import ListConfig, DictConfig
+
+from src.models.model_registry import get_version
 
 
 def _to_serializable(obj):
@@ -37,11 +38,15 @@ def convert_checkpoint(
 
     state_dict = checkpoint["model_state_dict"]
 
-    registry_dir = os.path.join(
+    registry_base = os.path.join(
         output_dir_path,
         model_name,
-        version,
     )
+
+    if version is None:
+        version = get_version(registry_base, new_version=True)
+
+    registry_dir = os.path.join(registry_base, version)
     os.makedirs(registry_dir, exist_ok=True)
 
     torch.save(
