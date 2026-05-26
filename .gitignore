@@ -219,6 +219,7 @@ __marimo__/
 mlflow.db
 model_registry
 checkpoints
+mlruns
 
 # Other
 _ignore
