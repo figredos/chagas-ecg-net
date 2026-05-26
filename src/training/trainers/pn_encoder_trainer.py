@@ -194,10 +194,15 @@ class PreNormEncoderTrainer(BaseTrainer):
 
             plt.close(disp.figure_)
 
+            checkpoint = torch.load(self.early_stopping.checkpoint_path)
+            self.model.load_state_dict(checkpoint["model_state_dict"])
+
             log_model(
                 self.model,
                 name="model",
+                registered_model_name="pn_encoder",
             )
+
             mlflow.log_artifact(
                 os.path.join(
                     self.cfg.pn_encoder.paths.checkpoints_dir,

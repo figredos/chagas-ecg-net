@@ -197,9 +197,13 @@ class SwinTransformerTrainer(BaseTrainer):
 
             plt.close(disp.figure_)
 
+            checkpoint = torch.load(self.early_stopping.checkpoint_path)
+            self.model.load_state_dict(checkpoint["model_state_dict"])
+
             log_model(
                 self.model,
                 name="model",
+                registered_model_name="swin_transformer",
             )
             mlflow.log_artifact(
                 os.path.join(
