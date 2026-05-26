@@ -39,6 +39,6 @@ mlflow:
   experiment_name: swin_transformer_ecg
   run_name: null
   tracking_uri: sqlite:///mlflow.db
-  version: v1
+  version: null
 
 notebook: False

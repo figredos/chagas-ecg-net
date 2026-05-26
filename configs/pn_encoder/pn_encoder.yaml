@@ -42,6 +42,6 @@ mlflow:
   experiment_name: pn_encoder_ecg
   run_name: null
   tracking_uri: sqlite:///mlflow.db
-  version: v1
+  version: null
 
 notebook: False

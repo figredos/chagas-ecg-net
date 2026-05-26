@@ -1,7 +1,7 @@
 data:
   train_size: 0.8
   test_size: 0.2
-  class_names: ["Chagas", "Normal", "Structural"]
+  class_names: ["Normal", "Chagas", "Structural"]
   use_pre_split: False
   complete_dataset_path: datasets/complete/3_class_dataset.pt
   split_train_dataset_path: datasets/split/train/3_class_train.pt
@@ -35,6 +35,6 @@ mlflow:
   experiment_name: cnn_bert_ecg
   run_name: null
   tracking_uri: sqlite:///mlflow.db
-  version: v1
+  version: null
 
 notebook: False
