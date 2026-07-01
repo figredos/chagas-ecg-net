@@ -10,4 +10,4 @@ class PredictionResponse(BaseModel):
     model_name: str
     model_version: str
     inference_time_ms: float
-    source_format: Literal["hdf5", "wfdb"]
+    source_format: Literal["wfdb"]
