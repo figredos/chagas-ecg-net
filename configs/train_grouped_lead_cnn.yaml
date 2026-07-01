@@ -1,0 +1,8 @@
+defaults:
+  - grouped_lead_cnn: grouped_lead_cnn
+  - _self_
+
+name: grouped_lead_cnn
+task: Chagas Classification with Grouped Lead CNN
+device: cuda
+seed: 42

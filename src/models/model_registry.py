@@ -10,6 +10,7 @@ from src.models.base import ECGClassifier
 from src.models.cnn_bert import CNNBertClassifier
 from src.models.swin_transformer import SwinTransformer
 from src.models.pn_encoder import PreNormEncoderClassifier
+from src.models.group_lead_cnn import GroupedLeadCNNClassifier
 
 
 def get_version(
@@ -44,6 +45,7 @@ def instantiate_model_with_params(
         "pn_encoder": PreNormEncoderClassifier,
         "cnn_bert": CNNBertClassifier,
         "swin_transformer": SwinTransformer,
+        "grouped_lead_cnn": GroupedLeadCNNClassifier,
     }
 
     if model_name not in model_map:

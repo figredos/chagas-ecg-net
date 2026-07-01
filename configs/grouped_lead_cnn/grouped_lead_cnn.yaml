@@ -1,0 +1,37 @@
+data:
+  train_size: 0.8
+  test_size: 0.2
+  class_names: [chagas, non-chagas]
+  use_pre_split: false
+  complete_dataset_path: datasets/samitrop_ptbxl_equalized_balanced.pt
+  split_train_dataset_path: ""
+  split_test_dataset_path: ""
+
+model:
+  feature_dim: 256
+  num_heads: 4
+  num_classes: 2
+  ffn_dropout_p: 0.1
+  clf_dropout_p: 0.3
+  batch_size: 128
+
+training:
+  epochs: 200
+  lr: 0.0003
+  weight_decay: 0.05
+  es_patience: 15
+  min_delta: 0.001
+  scheduler_factor: 0.3
+  scheduler_patience: 5
+
+paths:
+  checkpoints_dir: checkpoints/grouped_lead_cnn
+  save_filename: grouped_lead_cnn_artifact
+
+mlflow:
+  experiment_name: grouped_lead_cnn_ecg
+  run_name: null
+  tracking_uri: sqlite:///mlflow.db
+  version: null
+  
+notebook: true
