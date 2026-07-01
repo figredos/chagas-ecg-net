@@ -34,15 +34,11 @@ def _string_to_len(
 
 def _print_eval_table(
     evaluations: dict[str, Any] | tuple[dict[str, Any]] | list[dict[str, Any]],
-    num_classes: int,
     class_labels: list[str] | None = None,
 ) -> None:
     output_len = 20
     if not class_labels:
-        class_labels = [f"{label}" for label in range(num_classes)]
-
-    if len(class_labels) != num_classes:
-        raise ValueError()
+        class_labels = [f"{label}" for label in range(2)]
 
     if isinstance(evaluations, dict):
         evaluations = [evaluations]
@@ -117,7 +113,6 @@ def _print_eval_table(
 
 def _evaluate_model(
     model_name: str,
-    num_classes: int,
     dataset: torch.utils.data.Dataset,
     batch_size: int,
     device: str = "cpu",
@@ -146,13 +141,6 @@ def _evaluate_model(
 
     process_time = (time.perf_counter() - start) * 1000
 
-    if num_classes < 3 and model_name == "cnn_bert":
-        predictions = torch.where(
-            predictions == 2,
-            torch.zeros_like(predictions),
-            predictions,
-        )
-
     metrics = classification_report(
         y_true=targets.cpu(), y_pred=predictions.cpu(), output_dict=True
     )
@@ -172,18 +160,8 @@ def parse_arguments() -> ArgumentParser:
     parser.add_argument(
         "-m",
         "--model",
-        choices=["cnn_bert", "swin_transformer", "pn_encoder"],
+        choices=["cnn_bert", "swin_transformer", "pn_encoder", "grouped_lead_cnn"],
         help="Model to evaluate. If omitted, evaluates all models.",
-    )
-    parser.add_argument(
-        "-n",
-        "--num_classes",
-        help="""
-        Number of classes to predict on. 2 or 3 
-        (note that the only model for 3-class prediction is \"cnn_bert\").
-        """,
-        default=2,
-        type=int,
     )
     parser.add_argument(
         "-json",
@@ -203,31 +181,16 @@ def parse_arguments() -> ArgumentParser:
 
 def evaluate_models(args: Namespace) -> None:
 
-    if args.num_classes == 3 and args.model not in (None, "cnn_bert"):
-        raise ValueError("The only model that supports 3-class prediction is cnn_bert")
+    dataset = torch.load("datasets/2_class.pt")
+    data = dataset["data"].to(torch.float32)
+    labels = dataset["labels"]
 
-    if args.num_classes not in (2, 3):
-        raise ValueError("num_classes must be 2 or 3")
-
-    # Loading Dataset
-    if args.num_classes == 3:
-        dataset = torch.load("datasets/complete/3_class_dataset.pt")
-        data = dataset["data"].to(torch.float32)
-        labels = dataset["labels"]
-    else:
-        dataset = torch.load("datasets/complete/2_class_dataset.pt")
-        data = dataset["data"].to(torch.float32)
-        labels = dataset["labels"]
-
-    class_labels = (
-        ["non-Chagas", "Chagas"]
-        if args.num_classes < 3
-        else ["Normal", "Chagas", "Structural"]
-    )
+    class_labels = ["non-Chagas", "Chagas"]
 
     eval_dicts = []
+
     # Evaluating all models
-    if args.model is None and args.num_classes < 3:
+    if args.model is None:
         cnn_bert_dataset = RawECGDataset(data, labels)
         st_dataset = STRawECGDataset(data, labels)
         pn_encoder_dataset = CD2ECGDataset(
@@ -240,48 +203,63 @@ def evaluate_models(args: Namespace) -> None:
             stride=100,
             filter=0.5,
         )
+        gl_cnn_dataset = RawECGDataset(data, labels)
 
         cnn_bert_eval = _evaluate_model(
             model_name="cnn_bert",
-            num_classes=args.num_classes,
             dataset=cnn_bert_dataset,
             batch_size=128,
             device=args.device,
         )
+
         swin_transformer_eval = _evaluate_model(
             model_name="swin_transformer",
-            num_classes=args.num_classes,
             dataset=st_dataset,
             batch_size=128,
             device=args.device,
         )
+
         pn_encoder_eval = _evaluate_model(
             model_name="pn_encoder",
-            num_classes=args.num_classes,
             dataset=pn_encoder_dataset,
             batch_size=128,
             device=args.device,
         )
-        eval_dicts.extend([cnn_bert_eval, swin_transformer_eval, pn_encoder_eval])
+
+        grouped_lead_cnn_eval = _evaluate_model(
+            model_name="grouped_lead_cnn",
+            dataset=gl_cnn_dataset,
+            batch_size=128,
+            device=args.device,
+        )
+
+        eval_dicts.extend(
+            [
+                cnn_bert_eval,
+                swin_transformer_eval,
+                pn_encoder_eval,
+                grouped_lead_cnn_eval,
+            ]
+        )
+
     # Evaluating only CNN-Bert
     elif args.model == "cnn_bert":
         cnn_bert_dataset = RawECGDataset(data, labels)
 
         cnn_bert_eval = _evaluate_model(
             model_name="cnn_bert",
-            num_classes=args.num_classes,
             dataset=cnn_bert_dataset,
             batch_size=128,
             device=args.device,
         )
         eval_dicts.append(cnn_bert_eval)
+
     # Evaluating only SwinTransformer
-    elif args.model == "swin_transformer" and args.num_classes < 3:
+    elif args.model == "swin_transformer":
         st_dataset = STRawECGDataset(data, labels)
 
         swin_transformer_eval = _evaluate_model(
             model_name="swin_transformer",
-            num_classes=args.num_classes,
             dataset=st_dataset,
             batch_size=128,
             device=args.device,
@@ -289,7 +267,7 @@ def evaluate_models(args: Namespace) -> None:
         eval_dicts.append(swin_transformer_eval)
 
     # Evaluating only Pre-Norm Encoder
-    elif args.model == "pn_encoder" and args.num_classes < 3:
+    elif args.model == "pn_encoder":
         pn_encoder_dataset = CD2ECGDataset(
             data,
             labels,
@@ -302,7 +280,6 @@ def evaluate_models(args: Namespace) -> None:
         )
         pn_encoder_eval = _evaluate_model(
             model_name="pn_encoder",
-            num_classes=args.num_classes,
             dataset=pn_encoder_dataset,
             batch_size=128,
             device=args.device,
@@ -310,9 +287,20 @@ def evaluate_models(args: Namespace) -> None:
 
         eval_dicts.append(pn_encoder_eval)
 
+    # Evaluating only Grouped-Lead CNN
+    elif args.model == "grouped_lead_cnn":
+        st_dataset = RawECGDataset(data, labels)
+
+        swin_transformer_eval = _evaluate_model(
+            model_name="grouped_lead_cnn",
+            dataset=st_dataset,
+            batch_size=128,
+            device=args.device,
+        )
+        eval_dicts.append(swin_transformer_eval)
+
     _print_eval_table(
         eval_dicts,
-        num_classes=args.num_classes,
         class_labels=class_labels,
     )
 
