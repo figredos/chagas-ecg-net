@@ -1,12 +1,11 @@
 data:
   train_size: 0.8
   test_size: 0.2
-  class_names: ["Normal", "Chagas", "Structural"]
+  class_names: [chagas, non-chagas]
   use_pre_split: False
-  complete_dataset_path: datasets/complete/3_class_dataset.pt
-  split_train_dataset_path: datasets/split/train/3_class_train.pt
-  split_test_dataset_path: datasets/split/train/3_class_test.pt
-
+  complete_dataset_path: datasets/samitrop_ptbxl_equalized_balanced.pt
+  split_train_dataset_path: ""
+  split_test_dataset_path: ""
 training:
   epochs: 200
   lr: 3e-4
@@ -22,7 +21,7 @@ model:
   d_model: 128
   num_heads: 8
   num_leads: 12
-  num_classes: 3
+  num_classes: 2
   num_transformer_layers: 4
   cnn_downsample_factor: 2
 

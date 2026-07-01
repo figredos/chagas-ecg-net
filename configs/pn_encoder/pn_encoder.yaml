@@ -3,9 +3,9 @@ data:
   test_size: 0.2
   class_names: ["Chagas", "non-Chagas"]
   use_pre_split: False
-  complete_dataset_path: datasets/complete/2_class_dataset.pt
-  split_train_dataset_path: datasets/split/2_class_train.pt
-  split_test_dataset_path: datasets/split/2_class_test.pt
+  complete_dataset_path: datasets/samitrop_ptbxl_equalized_balanced.pt
+  split_train_dataset_path: ""
+  split_test_dataset_path: ""
 
   # Dataset specific  
   wavelet: bior3.3
@@ -16,7 +16,7 @@ data:
   filter: 0.5
 
 training:
-  epochs: 50
+  epochs: 100
   lr: 1e-3
   plateau_patience: 5
   es_patience: 15
