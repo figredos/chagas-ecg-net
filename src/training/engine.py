@@ -7,6 +7,8 @@ from typing import Any
 import torch
 import mlflow
 
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR
+
 from sklearn.metrics import classification_report, accuracy_score
 
 from tqdm import tqdm as traditional_tqdm
@@ -147,7 +149,7 @@ def train(
     train_dataloader: torch.utils.data.DataLoader,
     test_dataloader: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
-    scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau,
+    scheduler: ReduceLROnPlateau | CosineAnnealingLR,
     loss_fn: torch.nn.Module = torch.nn.CrossEntropyLoss(),
     run_id: str | None = None,
     early_stopping: EarlyStopping | None = None,
@@ -207,7 +209,10 @@ def train(
             notebook=notebook,
         )
 
-        scheduler.step(test_loss)
+        if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+            scheduler.step(test_loss)
+        else:
+            scheduler.step()
 
         train_acc = accuracy_score(y_pred=train_preds.cpu(), y_true=train_labels.cpu())
 

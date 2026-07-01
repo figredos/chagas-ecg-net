@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from omegaconf import DictConfig, OmegaConf
 
 import torch
+from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 
 from sklearn.metrics import ConfusionMatrixDisplay
 
@@ -36,7 +37,7 @@ class BaseTrainer(ABC):
     def _build_optimizer(self) -> torch.optim.Optimizer: ...
 
     @abstractmethod
-    def _build_scheduler(self) -> torch.optim.lr_scheduler.ReduceLROnPlateau: ...
+    def _build_scheduler(self) -> ReduceLROnPlateau | CosineAnnealingLR: ...
 
     @abstractmethod
     def _build_dataloaders(self) -> tuple[DataLoader, DataLoader]: ...
