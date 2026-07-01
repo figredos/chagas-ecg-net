@@ -1,10 +1,26 @@
+from typing import Any
+
 import torch
 import torch.nn.functional as F
+
+from abc import ABC, abstractmethod
 
 from src.utils.helpers import extract_cd2_coeffs, window_ecg
 
 
-class RawECGDataset(torch.utils.data.Dataset):
+class BaseDataset(torch.utils.data.Dataset, ABC):
+    @classmethod
+    @abstractmethod
+    def transform_sample(cls, x: torch.Tensor) -> torch.Tensor: ...
+
+    @abstractmethod
+    def __len__(self) -> int: ...
+
+    @abstractmethod
+    def __getitem__(self, index) -> Any: ...
+
+
+class RawECGDataset(BaseDataset):
     """
     Dataset for raw ECG signals without spectrograms
 
@@ -12,6 +28,10 @@ class RawECGDataset(torch.utils.data.Dataset):
         data: ECG signals.
         labels: Class labels of shape (N,)
     """
+
+    @classmethod
+    def transform_sample(cls, x: torch.Tensor) -> torch.Tensor:
+        return x.to(torch.float32)  # already (12, 734) — no transpose needed
 
     def __init__(self, data, labels):
         """ """
@@ -24,12 +44,12 @@ class RawECGDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         ecg = self.data[index]
 
-        ecg = ecg.T.to(torch.float32)
+        ecg = RawECGDataset.transform_sample(x=ecg)
 
         return ecg, self.labels[index]
 
 
-class STRawECGDataset(torch.utils.data.Dataset):
+class STRawECGDataset(BaseDataset):
     """
     Dataset for raw ECG signals without spectrograms
 
@@ -38,35 +58,38 @@ class STRawECGDataset(torch.utils.data.Dataset):
         labels: Class labels of shape (N,)
     """
 
-    def __init__(self, data, labels):
-        """ """
-        self.data = data
-        self.labels = labels
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, index):
-        ecg = self.data[index]
-        ecg = ecg.T
+    @classmethod
+    def transform_sample(cls, x: torch.Tensor) -> torch.Tensor:
+        x = x.T
 
         target_height = 32
         target_width = 768
 
-        current_height, current_width = ecg.shape
+        current_height, current_width = x.shape
 
         pad_top = (target_height - current_height) // 2
         pad_bottom = target_height - current_height - pad_top
         pad_left = (target_width - current_width) // 2
         pad_right = target_width - current_width - pad_left
 
-        # Apply padding
-        ecg = F.pad(
-            ecg, (pad_left, pad_right, pad_top, pad_bottom), mode='constant', value=0
-        )
+        x = F.pad(
+            x, (pad_left, pad_right, pad_top, pad_bottom), mode='constant', value=0
+        ).unsqueeze(0)
 
-        # Add channel dimension: (1, 32, 768)
-        ecg = ecg.unsqueeze(0)
+        return x
+
+    def __init__(self, data, labels):
+        """ """
+        self.data = data
+        self.labels = labels
+
+    def __len__(self) -> int:
+        return len(self.labels)
+
+    def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
+        ecg = self.data[index]
+
+        ecg = STRawECGDataset.transform_sample(x=ecg)
 
         return ecg, self.labels[index]
 
@@ -120,8 +143,8 @@ class CD2ECGDataset(torch.utils.data.Dataset):
         self.data = data
         self.labels = labels
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.labels)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> tuple[torch.Tensor, torch.Tensor]:
         return self.data[index], self.labels[index]
