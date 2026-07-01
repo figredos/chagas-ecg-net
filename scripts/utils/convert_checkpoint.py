@@ -44,7 +44,7 @@ def convert_checkpoint(
     )
 
     if version is None:
-        version = get_version(registry_base, new_version=True)
+        version = get_version(registry_base, new_version=True, model_name=model_name)
 
     registry_dir = os.path.join(registry_base, version)
     os.makedirs(registry_dir, exist_ok=True)
