@@ -133,7 +133,7 @@ def window_ecg(
     windowed_labels = []
 
     for i in range(len(ecg_data)):
-        ecg = ecg_data[i]
+        ecg = ecg_data[i].T
         label = labels[i]
 
         num_windows = (ecg.shape[0] - window_size) // stride + 1
