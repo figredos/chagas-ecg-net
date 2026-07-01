@@ -11,7 +11,7 @@ async def metrics(request: Request):
 
     request_count = request.app.state.metrics["request_count"]
     avg_pred_latency = (
-        (request.app.state.metrics["total_latency_ms"] / request)
+        (request.app.state.metrics["total_latency_ms"] / request_count)
         if request_count > 0
         else 0.0
     )
