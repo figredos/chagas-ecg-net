@@ -183,6 +183,20 @@ class PreNormEncoderClassifier(ECGClassifier):
                 elif "bias" in name:
                     nn.init.zeros_(param)
 
+    def _format_data(self, x: torch.Tensor) -> torch.Tensor:
+        x = x.to(torch.float32)
+
+        if x.ndim != 2:
+            raise ValueError(f"Expected 2D ECG tensor, got {x.shape}")
+
+        if x.shape == (734, 12):
+            return x.unsqueeze(0)
+
+        if x.shape == (12, 734):
+            return x.T.unsqueeze(0)
+
+        raise ValueError(f"Unexpected ECG shape: {x.shape}")
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass in Encoder Classifier.
 

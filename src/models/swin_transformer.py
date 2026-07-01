@@ -413,11 +413,11 @@ class SwinTransformer(ECGClassifier):
         hidden_dim: Size of hidden dimension for stage.
         layers: Tuple with number of Swin Blocks in model, one for each of the 4 stages.
         heads: Tuple with number of attention heads, one for each of the 4 stages.
-        channels: Number of channels of input. Default 3.
+        channels: Number of channels of input. Default 1.
         num_classes: Number of classes to predict. Default 2.
         head_dim: Dimensions of attention heads. Default 32.
-        window_size: Size of attention window. Default 7.
-        downscaling_factors: Factor to downsample spatial dimensions in input. Default `(4, 2, 2, 2)`.
+        window_size: Size of attention window. Default 2.
+        downscaling_factors: Factor to downsample spatial dimensions in input.
         relative_pos_embedding: Whether to use relative position embedding or positional embedding. Default True.
     """
 
@@ -426,11 +426,11 @@ class SwinTransformer(ECGClassifier):
         hidden_dim: int,
         layers: Tuple[int, int, int, int],
         heads: Tuple[int, int, int, int],
-        channels: int = 3,
-        num_classes: int = 1000,
+        channels: int = 1,
+        num_classes: int = 2,
         head_dim: int = 32,
-        window_size: int = 7,
-        downscaling_factors: Tuple[int, int, int, int] = (4, 2, 2, 2),
+        window_size: int = 2,
+        downscaling_factors: Tuple[int, int, int, int] = (1, 1, 1, 1),
         relative_pos_embedding: bool = True,
         class_names: list[str] | None = None,
         device: torch.device | str = "cpu",
@@ -487,11 +487,11 @@ class SwinTransformer(ECGClassifier):
             final_dim = hidden_dim * 2
         elif active_stages == 3:
             final_dim = hidden_dim * 4
-        else:  # 4 stages
+        else:
             final_dim = hidden_dim * 8
 
         self.mlp_head = nn.Sequential(
-            nn.LayerNorm(final_dim),  # MODIFIED: Dynamic dimension
+            nn.LayerNorm(final_dim),
             nn.Linear(final_dim, num_classes),
         )
 
@@ -502,21 +502,43 @@ class SwinTransformer(ECGClassifier):
             x: Input image. Shape: (B, C, H, W)
 
         Returns:
-            Logits of image class. Shape: (B, num_classes)
+            torch.Tensor: Logits of image class. Shape: (B, num_classes)
         """
         x = self.stage_1(x)
 
-        # MODIFIED: Conditional stages (comment out unused stages)
         if self.layers[1]:
-            if (
-                self.stage_2.patch_partition.downscaling_factor > 1
-            ):  # Only if stage 2 active
+            if self.stage_2.patch_partition.downscaling_factor > 1:
                 x = self.stage_2(x)
 
         if self.layers[2]:
-            x = self.stage_3(x)  # MODIFIED: Commented out (set layers[2]=0)
+            x = self.stage_3(x)
         if self.layers[3]:
-            x = self.stage_4(x)  # MODIFIED: Commented out (set layers[3]=0)
+            x = self.stage_4(x)
 
-        x = x.mean(dim=[2, 3])  # Global average pooling
+        x = x.mean(dim=[2, 3])
         return self.mlp_head(x)
+
+    def _format_data(self, x: torch.Tensor) -> torch.Tensor:
+        """Reshapes a raw ECG batch into the (B, C, H, W) layout forward() expects.
+
+        Incoming ECG tensors are shaped (12, SEQ_LEN) for a single sample, or
+        (B, 12, SEQ_LEN) for a batch.
+
+        Args:
+            x: Raw ECG tensor, shape (12, SEQ_LEN) or (B, 12, SEQ_LEN).
+
+        Returns:
+            torch.Tensor: Tensor of shape (B, 1, 12, SEQ_LEN), ready for forward().
+        """
+        if x.dim() == 2:
+            # Add batch dim for a single sample
+            x = x.unsqueeze(0)
+
+        if x.dim() != 3:
+            raise ValueError(
+                f"Expected input of shape (12, SEQ_LEN) or (B, 12, SEQ_LEN), "
+                f"got shape {tuple(x.shape)}"
+            )
+
+        x = x.unsqueeze(1)
+        return x.to(self.device)
