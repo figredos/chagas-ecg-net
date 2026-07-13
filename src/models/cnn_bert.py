@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 import torch.nn as nn
 
@@ -199,7 +201,7 @@ class CNNBertClassifier(ECGClassifier):
         device: str | torch.device = "cpu",
         class_names: list[str] | None = None,
     ) -> None:
-        super().__init__(class_names or ["Normal", "Chagas", "Structural"])
+        super().__init__(class_names or ["Non-Chagas", "Chagas"])
         self.device = device
 
         self.cnn_encoder = MultiScaleCNNEncoder(
@@ -239,7 +241,7 @@ class CNNBertClassifier(ECGClassifier):
             nn.Linear(128, num_classes),
         )
 
-    def _format_data(self, x: torch.Tensor) -> torch.Tensor:
+    def _format_data(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         x = x.to(torch.float32)
 
         if x.ndim != 2:

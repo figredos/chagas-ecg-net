@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -53,7 +55,7 @@ class GroupedLeadCNNClassifier(ECGClassifier):
         num_classes: int = 2,
         ffn_dropout_p: float = 0.1,
         clf_dropout_p: float = 0.3,
-        class_names: list[str] = ["Chagas", "Non-Chagas"],
+        class_names: list[str] = ["Non-Chagas", "Chagas"],
         device: str = "cpu",
     ) -> None:
         super().__init__(class_names=class_names)
@@ -96,7 +98,7 @@ class GroupedLeadCNNClassifier(ECGClassifier):
             nn.Linear(256, num_classes),
         )
 
-    def _format_data(self, x: torch.Tensor) -> torch.Tensor:
+    def _format_data(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         x = x.to(torch.float32)
         if x.ndim != 2:
             raise ValueError(f"Expected 2D tensor, got {x.shape}")
