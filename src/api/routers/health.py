@@ -13,7 +13,7 @@ async def live():
 
 @router.get("/health/ready")
 async def ready(request: Request):
-    if hasattr(request.app.state, "predictor"):
+    if getattr(request.app.state, "predictor", None) is not None:
         return {
             "status": 200,
             "details": "Model loaded and ready for inference.",
