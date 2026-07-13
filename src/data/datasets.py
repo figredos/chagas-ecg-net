@@ -11,7 +11,7 @@ from src.utils.helpers import extract_cd2_coeffs, window_ecg
 class BaseDataset(torch.utils.data.Dataset, ABC):
     @classmethod
     @abstractmethod
-    def transform_sample(cls, x: torch.Tensor) -> torch.Tensor: ...
+    def transform_sample(cls, x: torch.Tensor, **kwargs) -> torch.Tensor: ...
 
     @abstractmethod
     def __len__(self) -> int: ...
@@ -30,7 +30,7 @@ class RawECGDataset(BaseDataset):
     """
 
     @classmethod
-    def transform_sample(cls, x: torch.Tensor) -> torch.Tensor:
+    def transform_sample(cls, x: torch.Tensor, **kwargs) -> torch.Tensor:
         return x.to(torch.float32)  # already (12, 734) — no transpose needed
 
     def __init__(self, data, labels):
@@ -59,7 +59,7 @@ class STRawECGDataset(BaseDataset):
     """
 
     @classmethod
-    def transform_sample(cls, x: torch.Tensor) -> torch.Tensor:
+    def transform_sample(cls, x: torch.Tensor, **kwargs) -> torch.Tensor:
         x = x.T
 
         target_height = 32
@@ -104,11 +104,52 @@ class CD2ECGDataset(torch.utils.data.Dataset):
         level (int): Which level of the decomposition to use.
     """
 
+    @classmethod
+    def transform_sample(
+        cls,
+        data: torch.Tensor,
+        labels: torch.Tensor | None = None,
+        wavelet: str | None = "db3",
+        level: int = 3,
+        window_augment: bool = False,
+        window_size: int = 100,
+        stride: int = 100,
+        filter: float | None = None,
+        **kwargs,
+    ) -> Any:
+
+        exists_label = labels is not None
+
+        if not exists_label:
+            labels = torch.full((len(data),), torch.nan)
+
+        if data.ndim != 3:
+            if data.shape[0] == 12:
+                data = data.T
+            data = data.unsqueeze(0)
+
+        if window_augment:
+            data, labels = window_ecg(
+                ecg_data=data,
+                labels=labels,
+                window_size=window_size,
+                stride=stride,
+                filter=filter,
+            )
+
+        if wavelet:
+            data = extract_cd2_coeffs(ecg_batch=data, wavelet=wavelet, level=level)
+
+        if not exists_label:
+            return data
+
+        return data, labels
+
     def __init__(
         self,
         data: torch.Tensor,
         labels: torch.Tensor,
-        wavelet: str | bool = "db3",
+        wavelet: str | None = "db3",
         level: int = 3,
         window_augment: bool = False,
         window_size: int = 100,
@@ -128,20 +169,17 @@ class CD2ECGDataset(torch.utils.data.Dataset):
             filter (float | None, optional): Amplitude filter for ECGs. Defaults to None.
         """
         super().__init__()
-        if window_augment:
-            data, labels = window_ecg(
-                ecg_data=data,
-                labels=labels,
-                window_size=window_size,
-                stride=stride,
-                filter=filter,
-            )
 
-        if isinstance(wavelet, str):
-            data = extract_cd2_coeffs(ecg_batch=data, wavelet=wavelet, level=level)
-
-        self.data = data
-        self.labels = labels
+        self.data, self.labels = CD2ECGDataset.transform_sample(
+            data,
+            labels,
+            wavelet,
+            level,
+            window_augment,
+            window_size,
+            stride,
+            filter,
+        )
 
     def __len__(self) -> int:
         return len(self.labels)
