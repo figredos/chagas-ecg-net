@@ -9,7 +9,7 @@ data:
 
   # Dataset specific  
   wavelet: bior3.3
-  wavelet_level: 1
+  level: 1
   window_augment: True
   window_size: 200
   stride: 100
