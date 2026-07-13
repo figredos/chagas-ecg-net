@@ -2,10 +2,13 @@
 Contains PreNormTransformerEncoderLayer, and ECGEncoderClassifier.
 """
 
+from typing import Any
+
 import torch
 import torch.nn as nn
 
 from src.models.base import ECGClassifier
+from src.data.datasets import CD2ECGDataset
 
 
 class PreNormTransformerEncoderLayer(nn.Module):
@@ -114,12 +117,14 @@ class PreNormEncoderClassifier(ECGClassifier):
         dropout: float = 0.1,
         ff_multiplier: int = 4,
         class_names: list[str] | None = None,
+        dataset_kwargs: dict[str, Any] = {},
     ) -> None:
-        super().__init__(class_names or ["non-Chagas", "Chagas"])
+        super().__init__(class_names or ["Non-Chagas", "Chagas"])
 
         self.device = device
         self.embed_dim = embed_dim
         self.seq_len = seq_len
+        self.dataset_kwargs = dataset_kwargs
 
         # Token Embedding
         self.tok_emb = nn.Linear(num_leads, embed_dim)
@@ -183,19 +188,30 @@ class PreNormEncoderClassifier(ECGClassifier):
                 elif "bias" in name:
                     nn.init.zeros_(param)
 
-    def _format_data(self, x: torch.Tensor) -> torch.Tensor:
-        x = x.to(torch.float32)
-
+    def _format_data(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         if x.ndim != 2:
             raise ValueError(f"Expected 2D ECG tensor, got {x.shape}")
 
-        if x.shape == (734, 12):
-            return x.unsqueeze(0)
+        wavelet = self.dataset_kwargs["wavelet"]
+        level = self.dataset_kwargs["level"]
+        window_augment = self.dataset_kwargs["window_augment"]
+        window_size = self.dataset_kwargs["window_size"]
+        stride = self.dataset_kwargs["stride"]
+        filter = self.dataset_kwargs["filter"]
 
-        if x.shape == (12, 734):
-            return x.T.unsqueeze(0)
+        x = CD2ECGDataset.transform_sample(
+            data=x,
+            labels=None,
+            wavelet=wavelet,
+            level=level,
+            window_augment=window_augment,
+            window_size=window_size,
+            stride=stride,
+            filter=filter,
+        )
+        x = x.to(torch.float32)
 
-        raise ValueError(f"Unexpected ECG shape: {x.shape}")
+        return x
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass in Encoder Classifier.
@@ -241,3 +257,28 @@ class PreNormEncoderClassifier(ECGClassifier):
         logits = self.classifier(pooled)
 
         return logits
+
+    def predict(self, x: torch.Tensor, **kwargs) -> dict[str, Any]:
+        self.eval()
+
+        with torch.inference_mode():
+            x = self._format_data(x, **kwargs)
+
+            logits = self.forward(x).mean(dim=0)
+            probs = torch.nn.functional.softmax(logits, dim=0)
+
+            confidence, predicted_index = torch.max(probs, dim=0)
+
+            predicted_index = predicted_index.item()
+            confidence_score = confidence.item()
+
+            if not isinstance(predicted_index, int):
+                raise TypeError(f"Expected int, got {type(predicted_index)}")
+
+            label = self.class_names[predicted_index]
+        return {
+            "label": label,
+            "confidence": confidence_score,
+            "probabilities": probs.squeeze().tolist(),
+            "logits": logits.squeeze().tolist(),
+        }
