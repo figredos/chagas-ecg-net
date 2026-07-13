@@ -22,7 +22,6 @@ class ECGPredictor:
     def predict(self, signal: np.ndarray) -> PredictorOutput:
         tensor_signal = torch.from_numpy(signal.astype(np.float32))
         tensor_signal = tensor_signal.to(self.device)
-        print("model input shape:", tensor_signal.shape)
 
         raw = self.model.predict(tensor_signal)
 
