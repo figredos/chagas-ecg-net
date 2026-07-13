@@ -58,6 +58,7 @@ def load_model_from_registry(
     registry_root: str,
     model_name: str,
     model_version: str = "latest",
+    load_state_dict: bool = True,
     device: str = "cpu",
 ) -> tuple[ECGClassifier, dict[str, Any]]:
     registry_base = os.path.join(
@@ -99,9 +100,9 @@ def load_model_from_registry(
         constructor_kwargs=constructor_kwargs,
     )
 
-    state_dict = torch.load(state_dict_path, map_location=device)
-
-    model.load_state_dict(state_dict)
+    if load_state_dict:
+        state_dict = torch.load(state_dict_path, map_location=device)
+        model.load_state_dict(state_dict)
 
     model.eval()
 
