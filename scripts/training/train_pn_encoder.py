@@ -42,6 +42,14 @@ def main(cfg: DictConfig) -> None:
         "class_names": cfg.pn_encoder.data.class_names,
         "device": cfg.device,
     }
+    dataset_kwargs = {
+        "wavelet": cfg.pn_encoder.data.wavelet,
+        "level": cfg.pn_encoder.data.level,
+        "window_augment": cfg.pn_encoder.data.window_augment,
+        "window_size": cfg.pn_encoder.data.window_size,
+        "stride": cfg.pn_encoder.data.stride,
+        "filter": cfg.pn_encoder.data.filter,
+    }
 
     convert_checkpoint(
         checkpoint_path="./checkpoints/pn_encoder/pn_encoder_artifact.pth",
@@ -52,6 +60,7 @@ def main(cfg: DictConfig) -> None:
         class_names=cfg.pn_encoder.data.class_names,
         input_shape=trainer.data_shape,
         constructor_kwargs=constructor_kwargs,
+        dataset_kwargs=dataset_kwargs,
     )
 
     print("Pre-Norm Encoder was trained successfully.")
