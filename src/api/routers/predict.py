@@ -26,11 +26,20 @@ async def predict(
     if len(contents) > settings.max_upload_bytes:
         raise HTTPException(status_code=413, detail="File too large.")
 
-    if file.filename is None:
+    if file.filename is None or hea_file.filename is None:
         raise HTTPException(status_code=400, detail="File malformed")
 
+    file_name = Path(file.filename)
+    hea_file_name = Path(hea_file.filename)
+
+    file_extension = file_name.suffix.lstrip(".")
+    hea_file_extension = hea_file_name.suffix.lstrip(".")
+
+    if file_extension != "dat" or hea_file_extension != "hea":
+        raise HTTPException(status_code=415, detail="Unsupported file format")
+
     hea = await hea_file.read()
-    base_name = Path(file.filename).stem
+    base_name = file_name.stem
     ecg_signal = ECGParser.from_wfdb(
         dat_bytes=contents,
         hea_bytes=hea,
