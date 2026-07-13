@@ -19,11 +19,19 @@ class ECGParser:
 
     @staticmethod
     def from_wfdb(
-        dat_bytes: bytes, hea_bytes: bytes | None, base_name: str = "record"
+        dat_bytes: bytes,
+        hea_bytes: bytes | None,
+        base_path: str = "tmp",
+        base_name: str = "record",
     ) -> ECGSignal:
         with tempfile.TemporaryDirectory() as tmp:
-            record_path = os.path.join(tmp, base_name)
+            if base_path != "tmp":
+                record_path = os.path.join(base_path, base_name)
+            else:
+                record_path = os.path.join(tmp, base_name)
+
             Path(record_path + ".dat").write_bytes(dat_bytes)
+
             if hea_bytes is not None:
                 Path(record_path + ".hea").write_bytes(hea_bytes)
 
