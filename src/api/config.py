@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,6 +12,7 @@ class Settings(BaseSettings):
     device: str = "cpu"
     cors_origins: list[str] = ["*"]
     max_upload_bytes: int = 50 * 1024 * 1024  # 50MB
+    feedback_dir: Path = Path("feedback")
 
 
 settings = Settings()  # type: ignore
