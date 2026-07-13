@@ -133,10 +133,13 @@ def window_ecg(
     windowed_labels = []
 
     for i in range(len(ecg_data)):
-        ecg = ecg_data[i].T
+        if ecg_data.shape[0] == 12:
+            ecg_data = ecg_data.T
+        ecg = ecg_data[i]
         label = labels[i]
 
         num_windows = (ecg.shape[0] - window_size) // stride + 1
+
         for w in range(num_windows):
             start_idx = w * stride
             end_idx = start_idx + window_size
