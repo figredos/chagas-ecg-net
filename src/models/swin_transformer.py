@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Any, Tuple
 
 import torch
 import torch.nn as nn
@@ -7,6 +7,7 @@ from einops import rearrange
 
 
 from src.models.base import ECGClassifier
+from src.data.datasets import STRawECGDataset
 
 
 def create_mask(
@@ -518,7 +519,7 @@ class SwinTransformer(ECGClassifier):
         x = x.mean(dim=[2, 3])
         return self.mlp_head(x)
 
-    def _format_data(self, x: torch.Tensor) -> torch.Tensor:
+    def _format_data(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """Reshapes a raw ECG batch into the (B, C, H, W) layout forward() expects.
 
         Incoming ECG tensors are shaped (12, SEQ_LEN) for a single sample, or
@@ -530,15 +531,8 @@ class SwinTransformer(ECGClassifier):
         Returns:
             torch.Tensor: Tensor of shape (B, 1, 12, SEQ_LEN), ready for forward().
         """
-        if x.dim() == 2:
-            # Add batch dim for a single sample
-            x = x.unsqueeze(0)
 
-        if x.dim() != 3:
-            raise ValueError(
-                f"Expected input of shape (12, SEQ_LEN) or (B, 12, SEQ_LEN), "
-                f"got shape {tuple(x.shape)}"
-            )
+        x = STRawECGDataset.transform_sample(x)
 
         x = x.unsqueeze(1)
         return x.to(self.device)
