@@ -33,6 +33,7 @@ def convert_checkpoint(
     class_names: list[str],
     input_shape: list[int] | torch.Size,
     constructor_kwargs: dict[str, Any],
+    dataset_kwargs: dict[str, Any] = {},
 ) -> None:
     checkpoint = torch.load(checkpoint_path)
 
@@ -64,6 +65,7 @@ def convert_checkpoint(
         "training_epochs": checkpoint["epoch"],
         "input_shape": input_shape,
         "constructor_kwargs": constructor_kwargs,
+        "dataset_kwargs": dataset_kwargs,
     }
 
     with open(os.path.join(registry_dir, "metadata.json"), "w") as f:
