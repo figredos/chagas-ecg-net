@@ -15,15 +15,16 @@ class ECGClassifier(nn.Module, ABC):
     def forward(self, x: torch.Tensor) -> torch.Tensor: ...
 
     @abstractmethod
-    def _format_data(self, x: torch.Tensor) -> torch.Tensor: ...
+    def _format_data(self, x: torch.Tensor, **kwargs) -> torch.Tensor: ...
 
-    def predict(self, x: torch.Tensor) -> dict[str, Any]:
+    def predict(self, x: torch.Tensor, **kwargs) -> dict[str, Any]:
         self.eval()
 
         with torch.inference_mode():
-            x = self._format_data(x)
+            x = self._format_data(x, **kwargs)
             logits = self.forward(x)
             probs = torch.nn.functional.softmax(logits, dim=1)
+
             confidence, predicted_index = torch.max(probs, dim=1)
 
             predicted_index = predicted_index.item()
