@@ -1,0 +1,13 @@
+sample 12 400 2934
+sample.dat 16 1000(0)/mV 16 0 -68 15676 0 I
+sample.dat 16 1000(0)/mV 16 0 -98 15612 0 II
+sample.dat 16 1000(0)/mV 16 0 -29 -32 0 III
+sample.dat 16 1000(0)/mV 16 0 88 -1571 0 AVR
+sample.dat 16 1000(0)/mV 16 0 -20 14744 0 AVL
+sample.dat 16 1000(0)/mV 16 0 -59 14971 0 AVF
+sample.dat 16 1000(0)/mV 16 0 49 -7936 0 V1
+sample.dat 16 1000(0)/mV 16 0 -68 4634 0 V2
+sample.dat 16 1000(0)/mV 16 0 -195 3875 0 V3
+sample.dat 16 1000(0)/mV 16 0 -293 7252 0 V4
+sample.dat 16 1000(0)/mV 16 0 -205 5951 0 V5
+sample.dat 16 1000(0)/mV 16 0 -127 7160 0 V6
