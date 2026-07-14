@@ -23,11 +23,11 @@ async def predict(
 ):
     contents = await file.read()
 
-    if len(contents) > settings.max_upload_bytes:
-        raise HTTPException(status_code=413, detail="File too large.")
-
     if file.filename is None or hea_file.filename is None:
         raise HTTPException(status_code=400, detail="File malformed")
+
+    if len(contents) > settings.max_upload_bytes:
+        raise HTTPException(status_code=413, detail="File too large.")
 
     file_name = Path(file.filename)
     hea_file_name = Path(hea_file.filename)
