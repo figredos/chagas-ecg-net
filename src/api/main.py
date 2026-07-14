@@ -3,6 +3,7 @@ import logging
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.config import settings
@@ -58,3 +59,8 @@ app.include_router(health_router)
 app.include_router(metrics_router)
 app.include_router(model_info_router)
 app.include_router(predict_router)
+
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/docs")
