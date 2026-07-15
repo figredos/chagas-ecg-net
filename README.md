@@ -1,8 +1,10 @@
 # Chagas-ECG-Net
 
-API for Chagas classification through ECGs.
-
 [![python3.11](https://img.shields.io/badge/python-3.11.15-blue?logo=python)](https://www.python.org/downloads/release/python-31115/)
+
+Chagas disease affects approximately 6–7 million people worldwide, with most cases concentrated in Latin America. Diagnosis through electrocardiographic (ECG) analysis is a common clinical approach, but requires specialist interpretation that is not always available in endemic regions.
+
+Chagas-ECG-Net is a production-ready REST API for automated Chagas disease classification from 12-lead ECG signals. It serves a Grouped-Lead CNN trained on SaMi-Trop and PTB-XL data, achieving 99.75% accuracy and perfect Chagas recall on the held-out test set. The API is built with FastAPI and PyTorch, containerized with Docker, and deployed on GCP Cloud Run (WIP).
 
 ---
 
