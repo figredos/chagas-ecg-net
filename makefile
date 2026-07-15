@@ -1,4 +1,4 @@
-MAKES=serve test docker-up docker-build deploy
+MAKES=serve test docker-build docker-up docker-down deploy
 
 
 .PHONY: $(patsubst %,%,$(MAKES))
@@ -9,11 +9,14 @@ serve:
 test:
 	pytest
 
-docker-up:
-	docker compose up --build
-
 docker-build:
 	docker build -t chagas-ecg-net:latest .
+
+docker-up:
+	docker compose up --build -d
+
+docker-down:
+	docker compose down
 
 deploy:
 # 	gcloud run deploy --region europe-west --allow-unauthenticated --port 8000 --memory 2Gi
