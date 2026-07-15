@@ -68,7 +68,11 @@ python3 -m venv .venv
 #### 2.2 Install project
 
 ```bash
+# Only for API usage
 pip install -e .
+
+# For full development
+pip install "[.dev]"
 ```
 
 ### 3. Serve
@@ -85,14 +89,17 @@ make serve
 
 #### Serving with Docker
 
-(WIP)
-
 To serve via docker, build the container and bring it online. All of which can be done easily through the make file.
 
 ```bash
+# Builds image
 make docker-build
 
+# Takes API live
 make docker-up
+
+# Takes API down
+make docker-down
 ```
 
 ### 4. Accessing API
