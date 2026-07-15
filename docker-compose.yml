@@ -1,0 +1,22 @@
+services:
+  api:
+    build: .
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    volumes:
+      - "./model_registry:/app/model_registry:ro"
+      - "./feedback:/app/feedback"
+    depends_on:
+      - mlflow
+  
+  mlflow:
+    image: ghcr.io/mlflow/mlflow
+    ports:
+      - 5000:5000
+    volumes:
+      - "./mlflow:/mlflow"
+      - "./mlflow.db:/mlflow.db"
+  
+    command: "mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow --host 0.0.0.0"
