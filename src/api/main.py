@@ -17,6 +17,13 @@ from src.api.routers.predict import router as predict_router
 from src.api.routers.feedback import router as feedback_router
 from src.api.routers.model_info import router as model_info_router
 
+from src.monitoring.prometheus import (
+    ERROR_COUNT,
+    PREDICTION_CLASS_DISTRIBUTION,
+    PREDICTION_LATENCY,
+    REQUEST_COUNT,
+)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,13 +36,6 @@ async def lifespan(app: FastAPI):
 
     app.state.predictor = ECGPredictor(model=model)
     app.state.metadata = metadata
-
-    app.state.start_time = time.time()
-    app.state.metrics = {
-        "request_count": 0,
-        "error_count": 0,
-        "total_latency_ms": 0.0,
-    }
 
     yield
 

@@ -10,6 +10,8 @@ from fastapi.datastructures import State
 from starlette.responses import Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from src.monitoring.prometheus import REQUEST_COUNT, ERROR_COUNT
+
 
 class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(
@@ -17,15 +19,21 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request[State]], Awaitable[Response]],
     ) -> Response:
-        request.app.state.metrics["request_count"] += 1
 
         start = time.perf_counter()
         response = await call_next(request)
         duration = (time.perf_counter() - start) * 1000
 
-        request.app.state.metrics["total_latency_ms"] += duration
+        REQUEST_COUNT.labels(
+            endpoint=request.url.path,
+            status_code=response.status_code,
+        ).inc()
+
         if response.status_code >= 400:
-            request.app.state.metrics["error_count"] += 1
+            ERROR_COUNT.labels(
+                endpoint=request.url.path,
+                status_code=response.status_code,
+            ).inc()
 
         log_dict = {
             "method": request.method,

@@ -11,6 +11,7 @@ from src.api.dependencies import get_model
 from src.inference.parsers import ECGParser
 from src.inference.predictor import ECGPredictor
 from src.api.schemas.ecg import PredictionResponse
+from src.monitoring.prometheus import PREDICTION_CLASS_DISTRIBUTION, PREDICTION_LATENCY
 
 router = APIRouter()
 
@@ -49,6 +50,11 @@ async def predict(
     start = time.perf_counter()
     prediction = await to_thread(predictor.predict, ecg_signal.signal)
     process_time = (time.perf_counter() - start) * 1000
+
+    PREDICTION_LATENCY.observe(process_time)
+    PREDICTION_CLASS_DISTRIBUTION.labels(
+        predicted_class=prediction.predicted_class
+    ).inc()
 
     return PredictionResponse(
         **dataclasses.asdict(prediction),
