@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: chagas_ecg_net_api
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['api:8000']
+    metrics_path: /metrics
