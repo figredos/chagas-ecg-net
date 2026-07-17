@@ -36,6 +36,7 @@ def mock_predictor():
     yield mock
 
     app.dependency_overrides.clear()
+    app.state.predictor = None
 
 
 @pytest.fixture()
