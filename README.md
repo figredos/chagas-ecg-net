@@ -1,6 +1,7 @@
 # Chagas-ECG-Net
 
 [![python3.11](https://img.shields.io/badge/python-3.11.15-blue?logo=python)](https://www.python.org/downloads/release/python-31115/)
+[![Cloud Run](https://img.shields.io/badge/Cloud%20Run-live-brightgreen?logo=googlecloud)](https://YOUR_CLOUD_RUN_URL)
 
 Chagas disease affects approximately 6–7 million people worldwide, with most cases concentrated in Latin America. Diagnosis through electrocardiographic (ECG) analysis is a common clinical approach, but requires specialist interpretation that is not always available in endemic regions.
 
@@ -49,7 +50,13 @@ graph TD
 
 ## Quick Start
 
-### 1. Clone Repository
+### Access API through cloud
+
+The API is live at [chagas-ecg-net](https://chagas-ecg-net-133719626866.europe-west2.run.app). `/docs` has exploration to run anything locally.
+
+### Build and serve locally
+
+#### 1. Clone Repository
 
 In a terminal from the directory in which the project will be located, use the following command.
 
@@ -57,17 +64,17 @@ In a terminal from the directory in which the project will be located, use the f
 git clone https://github.com/figredos/chagas-ecg-net.git
 ```
 
-### 2. Install project as package
+#### 2. Install project as package
 
 Before running, make sure to create a virtual environment and install the project as a package.
 
-#### 2.1 Create .venv
+##### 2.1 Create .venv
 
 ```bash
 python3 -m venv .venv
 ```
 
-#### 2.2 Install project
+##### 2.2 Install project
 
 ```bash
 # Only for API usage
@@ -77,11 +84,11 @@ pip install -e .
 pip install "[.dev]"
 ```
 
-### 3. Serve
+#### 3. Serve
 
 There are two possibilities for serving the project, either locally, or through the docker file (WIP).
 
-#### Serving Locally
+##### Serving Locally
 
 To serve locally, use the makefile through
 
@@ -89,7 +96,7 @@ To serve locally, use the makefile through
 make serve
 ```
 
-#### Serving with Docker
+##### Serving with Docker
 
 To serve via docker, build the container and bring it online. All of which can be done easily through the make file.
 
