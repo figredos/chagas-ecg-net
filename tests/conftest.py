@@ -15,14 +15,6 @@ from src.inference.predictor import ECGPredictor, PredictorOutput
 def client() -> TestClient:
     test_client = TestClient(app)
 
-    app.state.start_time = time.time()
-    app.state.metrics = {
-        "request_count": 0,
-        "error_count": 0,
-        "total_latency_ms": 0.0,
-        "avg_pred_latency_ms": 0.0,
-        "total_uptime_seconds": 0.0,
-    }
     return test_client
 
 

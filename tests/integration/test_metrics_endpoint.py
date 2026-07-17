@@ -1,9 +1,7 @@
 METRICS_FIELDS = [
     "request_count",
     "error_count",
-    "total_latency_ms",
-    "avg_pred_latency_ms",
-    "total_uptime_seconds",
+    "prediction_latency",
 ]
 
 
@@ -12,7 +10,7 @@ def test_metrics(client):
 
     assert response.status_code == 200
 
-    body = response.json()
+    body = response.text
 
     for key in METRICS_FIELDS:
         assert key in body
