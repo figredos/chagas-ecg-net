@@ -5,6 +5,10 @@
     - [Model versioning](#model-versioning)
     - [Changing API's model version](#changing-apis-model-version)
   - [Redeploying cloud run](#redeploying-cloud-run)
+  - [Drift Monitoring](#drift-monitoring)
+    - [Bias limitation](#bias-limitation)
+    - [What to do on Drift detection](#what-to-do-on-drift-detection)
+    - [Other limitations](#other-limitations)
 
 ## Adding new model version
 
@@ -61,3 +65,30 @@ To adjust which model the API is using, just adjust the `MODEL_NAME` setting to 
 ## Redeploying cloud run
 
 **_Cloud deployment is WIP_**
+
+## Drift Monitoring
+
+Drift monitoring is automatically performed through the `/feedback` endpoint. Once the number of feedback entries is divisible by the value of the config `drift_feedback_window`, the `run_drift_check` function is executed and produces an output file with the following fields:
+
+- **Drifted**: A boolean flag that indicates whether the model has drifted or not.
+- **Disagreement_rate**: Measures the rolling disagreement rate between model predictions and confirmed user corrections. This measurement was favoured over class distribution due to datasets being from different regions with different Chagas prevalence rates, making distribution comparison ambiguous. And the training and testing datasets being balanced.
+- **Sample count**: Number of analysed samples
+- **Insufficient data**: A boolean flag that indicates whether there was enough data for a valid analysis.
+
+### Bias limitation
+
+Although the intended use of the API is for specialized medical doctors to have a more nuanced approach to asking for exams, there should still be some bias due to Voluntary feedback. Users are more likely to correct confident errors than ambiguous ones, meaning the true error rate is underestimated.
+
+### What to do on Drift detection
+
+If there is any model drift detected through the feedback information, there are other solutions/explanations besides model retraining, and checking them for inconsistencies and errors is very important.
+
+- Inspecting recent feedback.
+- Comparing per class errors.
+- Verify the drift signal is real and not an artifact of a small or unrepresentative feedback window
+
+Only after these checks failed should retraining be chosen.
+
+### Other limitations
+
+This performance monitoring is not the most comprehensive, but a mere step in the completeness of the API. Full performance monitoring requires a labelled production dataset, and that falls far from the current iteration of the project.
