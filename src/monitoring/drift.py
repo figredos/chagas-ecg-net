@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import Any
 
 import os
@@ -28,8 +29,8 @@ def create_reference_baseline(model_name: str) -> dict[str, Any]:
     }
 
 
-def load_feedback(feedback_path: str, window: int) -> list[dict[str, Any]]:
-    with open(f"{feedback_path}/feedback.jsonl", "r") as jsonl_file:
+def load_feedback(feedback_path: Path, window: int) -> list[dict[str, Any]]:
+    with open(feedback_path / "feedback.jsonl", "r") as jsonl_file:
         raw_feedback = jsonl_file.readlines()
 
         if window > len(raw_feedback):
@@ -63,7 +64,7 @@ def compute_disagreement_rate(feedback: list[dict]) -> dict[str, Any]:
 
 def check_drift(
     model_name: str,
-    feedback_path: str,
+    feedback_path: Path,
     threshold: float,
     feedback_window: int,
     min_samples: int,
@@ -91,8 +92,8 @@ def check_drift(
 
 def run_drift_check(
     model_name: str,
-    feedback_path: str,
-    output_path: str,
+    feedback_path: Path,
+    output_path: Path,
     threshold: float = 2.0,
     feedback_window: int = 50,
     min_samples: int = 50,
@@ -107,8 +108,10 @@ def run_drift_check(
         min_samples,
     )
 
-    os.makedirs(f"{output_path}/drift/", exist_ok=True)
-    with open(f"{output_path}/drift/drift_report_{timestamp}.json", "w") as drift_file:
+    os.makedirs(output_path / "drift", exist_ok=True)
+    with open(
+        output_path / "drift" / f"drift_report_{timestamp}.json", "w"
+    ) as drift_file:
         drift_file.write(json.dumps(check))
 
     return check
