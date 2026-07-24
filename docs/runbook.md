@@ -64,7 +64,25 @@ To adjust which model the API is using, just adjust the `MODEL_NAME` setting to 
 
 ## Redeploying cloud run
 
-**_Cloud deployment is WIP_**
+Cloud Run redeployment involves 2 steps, re-building and pushing the docker image and deploying the image to cloud_run:
+
+```bash
+# 1. Build for linux/amd64 and push
+docker buildx build --platform linux/amd64 \
+    -t europe-west2-docker.pkg.dev/PROJECT_ID/chagas-ecg-net/chagas-ecg-net:latest \
+    --push .
+
+# 2. Deploy to Cloud Run
+gcloud run deploy chagas-ecg-net \
+    --image=europe-west2-docker.pkg.dev/PROJECT_ID/chagas-ecg-net/chagas-ecg-net:latest \
+    --region=europe-west2 \
+    --allow-unauthenticated \
+    --port=8000 \
+    --memory=2Gi \
+    --set-env-vars="..."
+```
+
+`--set-env-vars` should be filled with pairs of keys and values from the `.env` variables.
 
 ## Drift Monitoring
 
