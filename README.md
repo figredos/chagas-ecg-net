@@ -1,7 +1,8 @@
 # Chagas-ECG-Net
 
 [![python3.11](https://img.shields.io/badge/python-3.11.15-blue?logo=python)](https://www.python.org/downloads/release/python-31115/)
-[![Cloud Run](https://img.shields.io/badge/Cloud%20Run-live-brightgreen?logo=googlecloud)](https://YOUR_CLOUD_RUN_URL)
+[![Cloud Run](https://img.shields.io/badge/Cloud%20Run-live-brightgreen?logo=googlecloud)](https://chagas-ecg-net-133719626866.europe-west2.run.app)
+[![Test](https://github.com/figredos/chagas-ecg-net/actions/workflows/test.yml/badge.svg)](https://github.com/figredos/chagas-ecg-net/actions/workflows/test.yml)
 
 Chagas disease affects approximately 6–7 million people worldwide, with most cases concentrated in Latin America. Diagnosis through electrocardiographic (ECG) analysis is a common clinical approach, but requires specialist interpretation that is not always available in endemic regions.
 
@@ -81,7 +82,7 @@ python3 -m venv .venv
 pip install -e .
 
 # For full development
-pip install "[.dev]"
+pip install ".[dev]"
 ```
 
 #### 3. Serve
