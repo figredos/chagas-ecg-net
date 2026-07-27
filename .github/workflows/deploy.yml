@@ -14,6 +14,8 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       - uses: google-github-actions/setup-gcloud@v2
       - run: gcloud auth configure-docker europe-west2-docker.pkg.dev --quiet
+      - name: Download model registry
+        run: gcloud storage cp -r gs://chagas-ecg-net-artifacts/model_registry .
       - name: Build and push
         run: |
           docker buildx build \
