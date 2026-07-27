@@ -35,7 +35,7 @@ def test_happy_path(client, mock_predictor):
     assert isinstance(body["inference_time_ms"], float)
 
     assert (
-        body["predicted_class"] == mock_predictor.predict.return_value.predicted_class
+        body["predicted_class"] == mock_predictor.route.return_value[1].predicted_class
     )
 
 

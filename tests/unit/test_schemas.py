@@ -13,6 +13,7 @@ PR_VALID_DICT = {
     "model_name": "group_lead_cnn",
     "model_version": "v2",
     "inference_time_ms": 19.0,
+    "ab_group": "a",
 }
 
 FR_VALID_DICT = {

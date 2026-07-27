@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from src.api.main import app
 from src.api.dependencies import get_model
 from src.inference.predictor import ECGPredictor, PredictorOutput
+from src.monitoring.ab_testing import ABRouter
 
 
 @pytest.fixture
@@ -20,7 +21,7 @@ def client() -> TestClient:
 
 @pytest.fixture
 def mock_predictor():
-    mock = MagicMock(spec=ECGPredictor)
+    mock = MagicMock(spec=ABRouter)
 
     mock_predictor_output = PredictorOutput(
         predicted_class="Chagas",
@@ -28,7 +29,9 @@ def mock_predictor():
         class_probabilities={"Chagas": 0.91, "Non-Chagas": 0.09},
     )
 
-    mock.predict.return_value = mock_predictor_output
+    mock_ab_group = "a"
+
+    mock.route.return_value = (mock_ab_group, mock_predictor_output)
 
     app.dependency_overrides[get_model] = lambda: mock
     app.state.predictor = mock

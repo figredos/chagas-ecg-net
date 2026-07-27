@@ -12,7 +12,8 @@ MODEL_INFO_FIELDS = [
 
 
 def test_model_info(client):
-    client.app.state.metadata = {key: None for key in MODEL_INFO_FIELDS}
+    client.app.state.primary_metadata = {key: None for key in MODEL_INFO_FIELDS}
+    client.app.state.secondary_metadata = {key: None for key in MODEL_INFO_FIELDS}
 
     response = client.get("/model/info")
 
@@ -20,5 +21,7 @@ def test_model_info(client):
 
     body = response.json()
 
-    for key in MODEL_INFO_FIELDS:
+    for key in ["primary", "secondary"]:
         assert key in body
+        for model_info_fields in MODEL_INFO_FIELDS:
+            assert model_info_fields in body[key]
