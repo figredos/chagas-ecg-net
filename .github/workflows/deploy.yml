@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - run: gcloud auth configure-docker europe-west2-docker.pkg.dev --quiet
+      - name: Build and push
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -t europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/chagas-ecg-net/chagas-ecg-net:${{ github.sha }} \
+            -t europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/chagas-ecg-net/chagas-ecg-net:latest \
+            --push \
+            .
+      - name: Deploy
+        run: |
+          gcloud run deploy chagas-ecg-net \
+            --image=europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/chagas-ecg-net/chagas-ecg-net:${{ github.sha }} \
+            --region=europe-west2 \
+            --allow-unauthenticated \
+            --port=8000 \
+            --memory=2Gi \
+            --set-env-vars="REGISTRY_ROOT=/app/model_registry,PRIMARY_MODEL_NAME=grouped_lead_cnn,PRIMARY_MODEL_VERSION=latest,SECONDARY_MODEL_NAME=cnn_bert,SECONDARY_MODEL_VERSION=latest,SECONDARY_MODEL_RATIO=0.1,DEVICE=cpu,MAX_UPLOAD_BYTES=52428800,CORS_ORIGINS=[\"*\"]"
+      - name: Post URL to summary
+        run: |
+          URL=$(gcloud run services describe chagas-ecg-net \
+            --region=europe-west2 \
+            --format='value(status.url)')
+          echo "### Deployed to Cloud Run" >> $GITHUB_STEP_SUMMARY
+          echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
