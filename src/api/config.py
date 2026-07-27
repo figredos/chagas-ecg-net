@@ -7,8 +7,12 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
     registry_root: str
-    model_name: str
-    model_version: str
+    primary_model_name: str
+    primary_model_version: str
+
+    secondary_model_name: str
+    secondary_model_version: str
+    secondary_model_ratio: float
 
     feedback_dir: Path = Path("feedback")
 

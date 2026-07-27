@@ -1,5 +1,3 @@
-from typing import Literal
-
 from pydantic import BaseModel
 
 
@@ -10,3 +8,4 @@ class PredictionResponse(BaseModel):
     model_name: str
     model_version: str
     inference_time_ms: float
+    ab_group: str

@@ -9,8 +9,8 @@ from fastapi import APIRouter, UploadFile, HTTPException, Depends, File, Form
 from src.api.config import settings
 from src.api.dependencies import get_model
 from src.inference.parsers import ECGParser
-from src.inference.predictor import ECGPredictor
 from src.api.schemas.ecg import PredictionResponse
+from src.monitoring.ab_testing import ABRouter
 from src.monitoring.prometheus import PREDICTION_CLASS_DISTRIBUTION, PREDICTION_LATENCY
 
 router = APIRouter()
@@ -20,7 +20,7 @@ router = APIRouter()
 async def predict(
     file: UploadFile = File(...),
     hea_file: UploadFile = File(...),
-    predictor: ECGPredictor = Depends(get_model),
+    ab_router: ABRouter = Depends(get_model),
 ):
     contents = await file.read()
 
@@ -48,17 +48,31 @@ async def predict(
     )
 
     start = time.perf_counter()
-    prediction = await to_thread(predictor.predict, ecg_signal.signal)
+    ab_group, prediction = await to_thread(ab_router.route, ecg_signal.signal)
     process_time = (time.perf_counter() - start) * 1000
+
+    model_name = (
+        settings.primary_model_name
+        if ab_group == "a"
+        else settings.secondary_model_name
+    )
+
+    model_version = (
+        settings.primary_model_version
+        if ab_group == "a"
+        else settings.secondary_model_version
+    )
 
     PREDICTION_LATENCY.observe(process_time)
     PREDICTION_CLASS_DISTRIBUTION.labels(
-        predicted_class=prediction.predicted_class
+        predicted_class=prediction.predicted_class,
+        ab_group=ab_group,
     ).inc()
 
     return PredictionResponse(
         **dataclasses.asdict(prediction),
-        model_name=settings.model_name,
-        model_version=settings.model_version,
+        model_name=model_name,
+        model_version=model_version,
         inference_time_ms=process_time,
+        ab_group=ab_group,
     )

@@ -5,3 +5,4 @@ class FeedbackRequest(BaseModel):
     predicted_class: str
     true_class: str
     confidence_score: float
+    ab_group: str | None = None

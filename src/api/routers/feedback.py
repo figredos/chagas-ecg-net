@@ -28,10 +28,18 @@ async def feedback(feedback: FeedbackRequest):
 
     lines = sum(1 for _ in open(settings.feedback_dir / "feedback.jsonl"))
 
+    ab_group = feedback.ab_group or "a"
+
+    model_name = (
+        settings.primary_model_name
+        if ab_group == "a"
+        else settings.secondary_model_name
+    )
+
     if lines % settings.drift_feedback_window == 0:
         result = await to_thread(
             run_drift_check,
-            model_name=settings.model_name,
+            model_name=model_name,
             feedback_path=settings.feedback_dir,
             output_path=settings.drift_output_path,
             threshold=settings.drift_threshold,

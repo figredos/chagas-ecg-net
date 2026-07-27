@@ -1,7 +1,7 @@
 from fastapi import Request
 
-from src.inference.predictor import ECGPredictor
+from src.monitoring.ab_testing import ABRouter
 
 
-def get_model(request: Request) -> ECGPredictor:
-    return request.app.state.predictor
+def get_model(request: Request) -> ABRouter:
+    return request.app.state.ab_router

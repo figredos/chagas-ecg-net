@@ -20,6 +20,6 @@ PREDICTION_LATENCY = Histogram(
 
 PREDICTION_CLASS_DISTRIBUTION = Counter(
     name="prediction_class_distribution",
-    documentation="Distributions of predictions for each class",
-    labelnames=["predicted_class"],
+    documentation="Distributions of predictions per class",
+    labelnames=["predicted_class", "ab_group"],
 )
