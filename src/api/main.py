@@ -2,7 +2,8 @@ import logging
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.config import settings
@@ -60,6 +61,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
+
+
 logging.basicConfig(level=logging.INFO, force=True)
 
 app.add_middleware(
@@ -79,4 +83,4 @@ app.include_router(predict_router)
 
 @app.get("/")
 async def root():
-    return RedirectResponse(url="/docs")
+    return FileResponse("src/static/index.html")
